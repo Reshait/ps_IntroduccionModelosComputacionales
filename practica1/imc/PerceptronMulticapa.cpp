@@ -10,6 +10,7 @@
 #include <cstdlib>  // Para establecer la semilla srand() y generar números aleatorios rand()
 #include <limits>
 #include <math.h>
+#include <vector>
 
 #include "PerceptronMulticapa.h"
 
@@ -28,20 +29,42 @@ double realAleatorio(double Low, double High)
 // CONSTRUCTOR: Dar valor por defecto a todos los parámetros
 PerceptronMulticapa::PerceptronMulticapa()
 {
-	nNumCapas = 3;
-	pCapas = NULL;
-	dEta = 0.1;
-	dMu = 0.9;
-	bSesgo = true;
+	_nCapas = 3;
+	_dEta = 0.1;
+	_dMu = 0.9;
+	_bSesgo = true;
 }
 
+// ------------------------------
 // Reservar memoria para las estructuras de datos
-// nl tiene el numero de capas y npl es un vector que contiene el número de neuronas por cada una de las capas
+// nCapas tiene el numero de capas y vNeuronasPorCapa es un vector que contiene el número de neuronas por cada una de las capas
 // Rellenar vector Capa* pCapas
-int PerceptronMulticapa::inicializar(int nl, int npl[]) {
+int PerceptronMulticapa::inicializar(int nCapas, vector <int> &vNeuronasPorCapa) {
+	vector <Neurona> vCapa;
+	Neurona Naux;
 
+	Naux.x = 0.0;
+	Naux.dX = 0.0;
+
+	for(int i = 0; i < vNeuronasPorCapa[i]; i++)
+		Naux.vW_Copia.push_back(vNeuronasPorCapa[i] + _bSesgo);
+
+	if(nCapas > 3)
+		_nCapas = nCapas;
+
+	for(int i = 0; i < _nCapas; i++){
+
+		for(int j = 0; j < vNeuronasPorCapa[i]; j++){
+			PerceptronMulticapa::pesosAleatorios(Naux);
+			vCapa.push_back(Naux);
+		}
+
+		PerceptronMulticapa::aniadeCapa(vCapa);
+		vCapa.clear();
+	}
+
+	return 1;
 }
-
 
 // ------------------------------
 // DESTRUCTOR: liberar memoria
@@ -49,86 +72,101 @@ PerceptronMulticapa::~PerceptronMulticapa() {
 	liberarMemoria();
 }
 
+// ------------------------------
+// Rellenar todos los pesos (w) aleatoriamente entre -1 y 1
+void PerceptronMulticapa::pesosAleatorios(Neurona &N) {
+	//poner los pesos aleatorios entre -1 y 1
+		double aux = realAleatorio(-1,1);
+		N.vW.push_back(aux); 
+		N.vW_Copia.push_back(aux);
+}
+
+// ------------------------------
+// Alimentar las neuronas de vEntrada de la red con un patrón pasado como argumento
+void PerceptronMulticapa::alimentarEntradas(vector <double> &vEntrada) {
+
+	vector <Neurona> vCapa0;
+	Neurona Naux;
+
+	for(int i = 0; i < _vRed[0].size(); i++){
+		Naux.x = vEntrada[i];
+		Naux.dX = vEntrada[i];
+		 vCapa0.push_back(Naux);
+	}
+
+	_vRed.push_back(vCapa0);
+}
 
 // ------------------------------
 // Liberar memoria para las estructuras de datos
 void PerceptronMulticapa::liberarMemoria() {
-
-	for(int capas = 0; capas < nNumCapas; capas++)
-	{
-		for(int neuronas = 0; neuronas < pCapas[capas].nNumNeuronas; neuronas++)
-		{
-			delete [] pCapas[capas].pNeuronas[neuronas].deltaW;
-			delete [] pCapas[capas].pNeuronas[neuronas].ultimoDeltaW;
-			delete [] pCapas[capas].pNeuronas[neuronas].w;
-			delete [] pCapas[capas].pNeuronas[neuronas].wCopia;
-		}
-		delete [] pCapas[capas].pNeuronas;
-	}
-	delete [] pCapas;
-}
-
-// ------------------------------
-// Rellenar todos los pesos (w) aleatoriamente entre -1 y 1
-void PerceptronMulticapa::pesosAleatorios() {
-	//Añadiendo a la capa sus neuronas y pesos
-	//poner los pesos aleatorios entre -1 y 1
-
-	double aleatorio = 0.0;
-
-	for(int i = 1; i<nNumCapas; i++)
-	{
-		for(int j = 0; j<pCapas[i].nNumNeuronas; j++)
-		{
-			for(int k = 0; k<pCapas[i-1].nNumNeuronas+bSesgo; k++)
-			{
-				aleatorio = realAleatorio(-1,1);
-				pCapas[i].pNeuronas[j].w[k]=valor;
-			}
-		}
-	}	
-}
-
-// ------------------------------
-// Alimentar las neuronas de entrada de la red con un patrón pasado como argumento
-void PerceptronMulticapa::alimentarEntradas(double* input) {
-
+	_vRed.clear();
 }
 
 // ------------------------------
 // Recoger los valores predichos por la red (out de la capa de salida) y almacenarlos en el vector pasado como argumento
-void PerceptronMulticapa::recogerSalidas(double* output) {
-
+void PerceptronMulticapa::recogerSalidas(vector <double> &vSalida) {
+	for(int i = 0; i < _vRed[_vRed.size()-1].size(); i++){
+		vSalida.push_back(_vRed[_vRed.size()-1][i].x);
+	}
 }
 
 // ------------------------------
 // Hacer una copia de todos los pesos (copiar w en copiaW)
 void PerceptronMulticapa::copiarPesos() {
-
+	for(int i = 0; i < _vRed.size(); i++){
+		for(int j = 0; j < _vRed[i].size(); j++){
+				_vRed[i][j].vW_Copia = _vRed[i][j].vW;
+			}
+		}
 }
 
 // ------------------------------
 // Restaurar una copia de todos los pesos (copiar copiaW en w)
 void PerceptronMulticapa::restaurarPesos() {
-
+	for(int i = 0; i < _vRed.size(); i++){
+		for(int j = 0; j < _vRed[i].size(); j++){
+				_vRed[i][j].vW = _vRed[i][j].vW_Copia;
+			}
+		}
 }
 
 // ------------------------------
 // Calcular y propagar las salidas de las neuronas, desde la primera capa hasta la última
 void PerceptronMulticapa::propagarEntradas() {
+	double net;
 
+	for(int i = 1; i < _vRed.size(); i++){
+		for(int j = 0; j < _vRed[i].size(); j++){
+			net = 0.0;
+
+			for(int k = _bSesgo; k < _vRed[i-1].size() + _bSesgo; k++){
+				net += _vRed[i][j].vW[k] * _vRed[i-1][k - _bSesgo].x;
+			}
+
+			if(_bSesgo)
+				net += _vRed[i][j].vW[0];
+
+			_vRed[i][j].x = (1 / (1 + exp(-net)));
+		}
+	}
 }
+/*========================= Poco a poco joder
+
+
+
+
 
 // ------------------------------
 // Calcular el error de salida (MSE) del out de la capa de salida con respecto a un vector objetivo y devolverlo
-double PerceptronMulticapa::calcularErrorSalida(double* target) {
+double PerceptronMulticapa::calcularErrorSalida(vector <double> target) {
 
 }
 
 
 // ------------------------------
 // Retropropagar el error de salida con respecto a un vector pasado como argumento, desde la última capa hasta la primera
-void PerceptronMulticapa::retropropagarError(double* objetivo) {
+void PerceptronMulticapa::retropropagarError(vector <double> objetivo) {
 
 }
 
@@ -152,8 +190,8 @@ void PerceptronMulticapa::imprimirRed() {
 
 // ------------------------------
 // Simular la red: propagar las entradas hacia delante, computar el error, retropropagar el error y ajustar los pesos
-// entrada es el vector de entradas del patrón y objetivo es el vector de salidas deseadas del patrón
-void PerceptronMulticapa::simularRedOnline(double* entrada, double* objetivo) {
+// vEntrada es el vector de entradas del patrón y objetivo es el vector de salidas deseadas del patrón
+void PerceptronMulticapa::simularRedOnCapasine(vector <double> vEntrada, vector <double> objetivo) {
 
 }
 
@@ -165,15 +203,15 @@ Datos* PerceptronMulticapa::leerDatos(const char *archivo) {
 
 // ------------------------------
 // Entrenar la red on-line para un determinado fichero de datos
-void PerceptronMulticapa::entrenarOnline(Datos* pDatosTrain) {
+void PerceptronMulticapa::entrenarOnCapasine(vector <Datos> pDatosTrain) {
 	int i;
 	for(i=0; i<pDatosTrain->nNumPatrones; i++)
-		simularRedOnline(pDatosTrain->entradas[i], pDatosTrain->salidas[i]);
+		simularRedOnCapasine(pDatosTrain->entradas[i], pDatosTrain->salidas[i]);
 }
 
 // ------------------------------
 // Probar la red con un conjunto de datos y devolver el error MSE cometido
-double PerceptronMulticapa::test(Datos* pDatosTest) {
+double PerceptronMulticapa::test(vector <Datos> pDatosTest) {
 	int i;
 	double dAvgTestError = 0;
 	for(i=0; i<pDatosTest->nNumPatrones; i++){
@@ -190,7 +228,7 @@ double PerceptronMulticapa::test(Datos* pDatosTest) {
 // Ejecutar el algoritmo de entrenamiento durante un número de iteraciones, utilizando pDatosTrain
 // Una vez terminado, probar como funciona la red en pDatosTest
 // Tanto el error MSE de entrenamiento como el error MSE de test debe calcularse y almacenarse en errorTrain y errorTest
-void PerceptronMulticapa::ejecutarAlgoritmoOnline(Datos * pDatosTrain, Datos * pDatosTest, int maxiter, double *errorTrain, double *errorTest)
+void PerceptronMulticapa::ejecutarAlgoritmoOnCapasine(vector <Datos> pDatosTrain, vector <Datos> pDatosTest, int maxiter, double *errorTrain, double *errorTest)
 {
 	int countTrain = 0;
 
@@ -204,7 +242,7 @@ void PerceptronMulticapa::ejecutarAlgoritmoOnline(Datos * pDatosTrain, Datos * p
 	// Aprendizaje del algoritmo
 	do {
 
-		entrenarOnline(pDatosTrain);
+		entrenarOnCapasine(pDatosTrain);
 		double trainError = test(pDatosTrain);
 		// El 0.00001 es un valor de tolerancia, podría parametrizarse
 		if(countTrain==0 || fabs(trainError - minTrainError) > 0.00001){
@@ -234,7 +272,7 @@ void PerceptronMulticapa::ejecutarAlgoritmoOnline(Datos * pDatosTrain, Datos * p
 	cout << "Salida Esperada Vs Salida Obtenida (test)" << endl;
 	cout << "=========================================" << endl;
 	for(int i=0; i<pDatosTest->nNumPatrones; i++){
-		double* prediccion = new double[pDatosTest->nNumSalidas];
+		vector <double> prediccion = new double[pDatosTest->nNumSalidas];
 
 		// Cargamos las entradas y propagamos el valor
 		alimentarEntradas(pDatosTest->entradas[i]);
@@ -252,3 +290,6 @@ void PerceptronMulticapa::ejecutarAlgoritmoOnline(Datos * pDatosTrain, Datos * p
 	*errorTrain=minTrainError;
 
 }
+
+FIN Poco a poco joder ======================*/
+
