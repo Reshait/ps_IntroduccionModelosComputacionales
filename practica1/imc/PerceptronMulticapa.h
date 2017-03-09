@@ -31,17 +31,17 @@ struct Neurona {
 //};
 
 struct Datos {
-//	int nEntradas;     /* Número de entradas */
-//	int nSalidas;      /* Número de salidas */
+	int nEntradas;     /* Número de entradas */
+	int nSalidas;      /* Número de salidas */
 	int nPatrones;     /* Número de patrones */
-	vector< vector<double> > mEntradas;    /* Matriz con las entradas del problema */
-	vector< vector<double> > vSalidas;     /* Matriz con las salidas del problema */
+	vector<double> vEntradas;    /* Matriz con las entradas del problema */
+	vector<double> vSalidas;     /* Matriz con las salidas del problema */
 };
 
 class PerceptronMulticapa {
 private:
 //	int    nNumCapas;     /* Número de capas total en la red */
-	vector< vector<Neurona> > _vRed;         /* pCapas Vector con cada una de las capas */
+	vector< vector<Neurona> > _mRed;         /* pCapas Vector con cada una de las capas */
 
 	// Liberar memoria para las estructuras de datos
 	void liberarMemoria();
@@ -71,17 +71,17 @@ private:
 	void retropropagarError(vector <double>& objetivo);
 
 	// Acumular los cambios producidos por un patrón en deltaW
-//	void acumularCambio();
+	void acumularCambio();
 
 	// Actualizar los pesos de la red, desde la primera capa hasta la última
-//	void ajustarPesos();
+	void ajustarPesos();
 
 	// Imprimir la red, es decir, todas las matrices de pesos
-//	void imprimirRed();
+	void imprimirRed();
 
 	// Simular la red: propagar las entradas hacia delante, retropropagar el error y ajustar los pesos
 	// entrada es el vector de entradas del patrón y objetivo es el vector de salidas deseadas del patrón
-//	void simularRedO_nCapasine(vector <double> entrada, vector <double> objetivo);
+	void simularRedOnline(vector <double>& vEntrada, vector <double>& vObjetivo);
 
 
 public:
@@ -103,11 +103,12 @@ public:
 	int inicializar(int _nCapas, vector <int> &vNeuronasPorCapa);
 
 	void aniadeCapa(vector <Neurona> &vCapa){
-		_vRed.push_back(vCapa);
+		_mRed.push_back(vCapa);
 	}
 
 	// Leer una matriz de datos a partir de un nombre de fichero y devolverla
-	vector <Datos> leerDatos(const char *archivo);
+//	vector <Datos> leerDatos(const char *archivo);
+	Datos& leerDatos(const char *fichero);
 
 	// Entrenar la red on-line para un determinado fichero de datos
 	void entrenarO_nCapasine(vector <Datos> & pDatosTrain);
