@@ -140,35 +140,61 @@ void PerceptronMulticapa::propagarEntradas() {
 		for(int j = 0; j < _vRed[i].size(); j++){
 			net = 0.0;
 
-			for(int k = _bSesgo; k < _vRed[i-1].size() + _bSesgo; k++){
-				net += _vRed[i][j].vW[k] * _vRed[i-1][k - _bSesgo].x;
+			for(int k = 0; k < _vRed[i-1].size(); k++){
+				net += _vRed[i][j].vW[k] * _vRed[i-1][k].x;
 			}
 
 			if(_bSesgo)
-				net += _vRed[i][j].vW[0];
+				net += _vRed[i][j].vW[i-1];
 
 			_vRed[i][j].x = (1 / (1 + exp(-net)));
 		}
 	}
 }
+
+// ------------------------------
+// Calcular el error de salida (MSE) del out de la capa de salida con respecto a un vector objetivo y devolverlo
+double PerceptronMulticapa::calcularErrorSalida(vector <double>& target) {
+	double error = 0.0;
+
+	for(int i = 0; i < _vRed[_vRed.size()-1].size(); i++){
+		error += pow( _vRed[_vRed.size()-1][i].x - target[i], 2);
+	}
+
+	return error / _vRed[_vRed.size()-1].size(); // Número de neuronas en la penúltima capa
+}
+
+
+// ------------------------------
+// Retropropagar el error de salida con respecto a un vector pasado como argumento, desde la última capa hasta la primera
+void PerceptronMulticapa::retropropagarError(vector <double>& objetivo) {
+	for(int i = 0; i < _vRed[_vRed.size()-1].size(); i++){
+		double salida = _vRed[_vRed.size()-1][i].x;
+		_vRed[_vRed.size()-1][i].dX = (-1 * (objetivo[i] - salida) * salida * (1-salida));
+	}
+
+	for(int i = _vRed.size()-1; i > -1; i--){
+		for(int j = 0; j < _vRed[i].size(); j++){
+			double aux = 0.0;
+			
+			for(int k = 0; k < _vRed[i+1].size(); k++){
+				aux += _vRed[i+1][k].vW[j] * _vRed[i+1][k].dX;
+			}
+
+			double sal = _vRed[i][j].x;
+			_vRed[i][j].dX = aux * sal * (1 - sal);
+		}
+	}
+}
+
 /*========================= Poco a poco joder
 
 
 
 
 
-// ------------------------------
-// Calcular el error de salida (MSE) del out de la capa de salida con respecto a un vector objetivo y devolverlo
-double PerceptronMulticapa::calcularErrorSalida(vector <double> target) {
-
-}
 
 
-// ------------------------------
-// Retropropagar el error de salida con respecto a un vector pasado como argumento, desde la última capa hasta la primera
-void PerceptronMulticapa::retropropagarError(vector <double> objetivo) {
-
-}
 
 // ------------------------------
 // Acumular los cambios producidos por un patrón en deltaW

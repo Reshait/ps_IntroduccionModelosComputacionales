@@ -65,10 +65,10 @@ private:
 	void propagarEntradas();
 
 	// Calcular el error de salida (MSE) del out de la capa de salida con respecto a un vector objetivo y devolverlo
-//	double calcularErrorSalida(vector <double> objetivo);
+	double calcularErrorSalida(vector <double>& target);
 
 	// Retropropagar el error de salida con respecto a un vector pasado como argumento, desde la última capa hasta la primera
-//	void retropropagarError(vector <double> objetivo);
+	void retropropagarError(vector <double>& objetivo);
 
 	// Acumular los cambios producidos por un patrón en deltaW
 //	void acumularCambio();
