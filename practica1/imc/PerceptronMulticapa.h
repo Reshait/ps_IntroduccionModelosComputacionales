@@ -48,9 +48,11 @@ private:
 
 	// Rellenar todos los pesos (w) aleatoriamente entre -1 y 1
 	void pesosAleatorios(Neurona &N);
+	void pesosAleatorios();
 
 	// Alimentar las neuronas de entrada de la red con un patrón pasado como argumento
 	void alimentarEntradas(vector <double> &vEntrada);
+	void alimentarEntradas(double patron);
 
 	// Recoger los valores predichos por la red (out de la capa de salida) y almacenarlos en el vector pasado como argumento
 	void recogerSalidas(vector <double> &vSalida);
@@ -111,18 +113,16 @@ public:
 	Datos& leerDatos(const char *fichero);
 
 	// Entrenar la red on-line para un determinado fichero de datos
-	void entrenarO_nCapasine(vector <Datos> & pDatosTrain);
+	void entrenarOnline(Datos& D);
 
 	// Probar la red con un conjunto de datos y devolver el error MSE cometido
-	double test(vector <Datos> & pDatosTest);
+	double test(Datos& Dtest);
 
 	// Ejecutar el algoritmo de entrenamiento durante un número de iteraciones, utilizando pDatosTrain
     // Una vez terminado, probar como funciona la red en pDatosTest
     // Tanto el error MSE de entrenamiento como el error MSE de test debe calcularse y almacenarse en errorTrain y errorTest
-	void ejecutarAlgoritmoO_nCapasine(vector <Datos> & vDatosTrain, vector <Datos> & vDatosTest, int maxiter, vector <double> vErrorTrain, vector <double> vErrorTest);
+	void ejecutarAlgoritmoOnline(Datos& Dtrain, Datos& Dtest, int maxiter, double *errorTrain, double *errorTest);
 
 };
-
-};
-
+}
 #endif

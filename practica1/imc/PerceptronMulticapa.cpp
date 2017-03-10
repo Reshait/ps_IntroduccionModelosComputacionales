@@ -81,6 +81,20 @@ void PerceptronMulticapa::pesosAleatorios(Neurona &N) {
 		N.vW_Copia.push_back(aux);
 }
 
+void PerceptronMulticapa::pesosAleatorios() {
+	for(int i = 1; i < _mRed.size(); i++){
+		for(int j = 1; j < _mRed[i].size(); j++){
+			
+			for(int k = 0; k < _mRed[i-1].size(); k++)
+				_mRed[i][j].vW[k] = realAleatorio(-1,1);
+
+			if(_bSesgo)
+				_mRed[i][j].vW[_mRed[i-1].size()] = realAleatorio(-1,1);
+			
+		}
+	}
+}
+
 // ------------------------------
 // Alimentar las neuronas de vEntrada de la red con un patrón pasado como argumento
 void PerceptronMulticapa::alimentarEntradas(vector <double> &vEntrada) {
@@ -90,7 +104,19 @@ void PerceptronMulticapa::alimentarEntradas(vector <double> &vEntrada) {
 
 	for(int i = 0; i < _mRed[0].size(); i++){
 		Naux.x = vEntrada[i];
-		Naux.dX = vEntrada[i];
+		vCapa0.push_back(Naux);
+	}
+
+	_mRed.push_back(vCapa0);
+}
+
+void PerceptronMulticapa::alimentarEntradas(double patron) {
+
+	vector <Neurona> vCapa0;
+	Neurona Naux;
+
+	for(int i = 0; i < _mRed[0].size(); i++){
+		Naux.x = patron;
 		 vCapa0.push_back(Naux);
 	}
 
@@ -292,44 +318,31 @@ Datos& PerceptronMulticapa::leerDatos(const char *fichero) {
 // Entrenar la red on-line para un determinado fichero de datos
 void PerceptronMulticapa::entrenarOnline(Datos& D) {
 	int i;
-	for(i=0; i < D.nPatrones; i++)
-		simularRedOnline(D.vEntradas[i], D.vSalidas[i]);
+	//for(i=0; i < D.nPatrones; i++)
+		simularRedOnline(D.vEntradas, D.vSalidas);
 }
-/*========================= Poco a poco joder
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // ------------------------------
 // Probar la red con un conjunto de datos y devolver el error MSE cometido
-double PerceptronMulticapa::test(vector <Datos> pDatosTest) {
+double PerceptronMulticapa::test(Datos& Dtest) {
 	int i;
 	double dAvgTestError = 0;
-	for(i=0; i<pDatosTest->nNumPatrones; i++){
+	for(i = 0; i < Dtest.nPatrones; i++){
 		// Cargamos las entradas y propagamos el valor
-		alimentarEntradas(pDatosTest->entradas[i]);
+		alimentarEntradas(Dtest.vEntradas[i]);
 		propagarEntradas();
-		dAvgTestError += calcularErrorSalida(pDatosTest->salidas[i]);
+		dAvgTestError += calcularErrorSalida(Dtest.vSalidas);
 	}
-	dAvgTestError /= pDatosTest->nNumPatrones;
+	dAvgTestError /= Dtest.nPatrones;
 	return dAvgTestError;
 }
 
+
 // ------------------------------
-// Ejecutar el algoritmo de entrenamiento durante un número de iteraciones, utilizando pDatosTrain
-// Una vez terminado, probar como funciona la red en pDatosTest
+// Ejecutar el algoritmo de entrenamiento durante un número de iteraciones, utilizando Dtrain
+// Una vez terminado, probar como funciona la red en Dtest
 // Tanto el error MSE de entrenamiento como el error MSE de test debe calcularse y almacenarse en errorTrain y errorTest
-void PerceptronMulticapa::ejecutarAlgoritmoOnCapasine(vector <Datos> pDatosTrain, vector <Datos> pDatosTest, int maxiter, double *errorTrain, double *errorTest)
+void PerceptronMulticapa::ejecutarAlgoritmoOnline(Datos& Dtrain, Datos& Dtest, int maxiter, double *errorTrain, double *errorTest)
 {
 	int countTrain = 0;
 
@@ -343,8 +356,8 @@ void PerceptronMulticapa::ejecutarAlgoritmoOnCapasine(vector <Datos> pDatosTrain
 	// Aprendizaje del algoritmo
 	do {
 
-		entrenarOnCapasine(pDatosTrain);
-		double trainError = test(pDatosTrain);
+		entrenarOnline(Dtrain);
+		double trainError = test(Dtrain);
 		// El 0.00001 es un valor de tolerancia, podría parametrizarse
 		if(countTrain==0 || fabs(trainError - minTrainError) > 0.00001){
 			minTrainError = trainError;
@@ -372,25 +385,24 @@ void PerceptronMulticapa::ejecutarAlgoritmoOnCapasine(vector <Datos> pDatosTrain
 
 	cout << "Salida Esperada Vs Salida Obtenida (test)" << endl;
 	cout << "=========================================" << endl;
-	for(int i=0; i<pDatosTest->nNumPatrones; i++){
-		vector <double> prediccion = new double[pDatosTest->nNumSalidas];
+	for(int i = 0; i < Dtest.nPatrones; i++){
+		vector <double> prediccion;
 
 		// Cargamos las entradas y propagamos el valor
-		alimentarEntradas(pDatosTest->entradas[i]);
+		alimentarEntradas(Dtest.vEntradas[i]);
 		propagarEntradas();
 		recogerSalidas(prediccion);
-		for(int j=0; j<pDatosTest->nNumSalidas; j++)
-			cout << pDatosTest->salidas[i][j] << " -- " << prediccion[j];
+		for(int j=0; j<Dtest.nSalidas; j++)
+			cout << Dtest.vSalidas[i][j] << " -- " << prediccion[j];
 		cout << endl;
-		delete[] prediccion;
+		prediccion.clear();
 
 	}
 
-	testError = test(pDatosTest);
+	testError = test(Dtest);
 	*errorTest=testError;
 	*errorTrain=minTrainError;
 
 }
 
-FIN Poco a poco joder ======================*/
 
