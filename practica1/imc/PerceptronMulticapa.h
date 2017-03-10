@@ -34,8 +34,8 @@ struct Datos {
 	int nEntradas;     /* Número de entradas */
 	int nSalidas;      /* Número de salidas */
 	int nPatrones;     /* Número de patrones */
-	vector<double> vEntradas;    /* Matriz con las entradas del problema */
-	vector<double> vSalidas;     /* Matriz con las salidas del problema */
+	vector <vector<double> > mEntradas;    /* Matriz con las entradas del problema */
+	vector <vector<double> > mSalidas;     /* Matriz con las salidas del problema */
 };
 
 class PerceptronMulticapa {
@@ -110,7 +110,7 @@ public:
 
 	// Leer una matriz de datos a partir de un nombre de fichero y devolverla
 //	vector <Datos> leerDatos(const char *archivo);
-	Datos& leerDatos(const char *fichero);
+	void leerDatos(const char *fichero, Datos& D);
 
 	// Entrenar la red on-line para un determinado fichero de datos
 	void entrenarOnline(Datos& D);

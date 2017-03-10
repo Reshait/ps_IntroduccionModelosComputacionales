@@ -285,11 +285,11 @@ void PerceptronMulticapa::simularRedOnline(vector <double>& vEntrada, vector <do
 
 // ------------------------------
 // Leer una matriz de datos a partir de un nombre de fichero y devolverla
-Datos& PerceptronMulticapa::leerDatos(const char *fichero) {
+void PerceptronMulticapa::leerDatos(const char *fichero, Datos& D) {
 
 	fstream f;
-	Datos D;
 	double aux;
+	vector <double> vAux;
 
 	f.open(fichero);
 
@@ -299,27 +299,29 @@ Datos& PerceptronMulticapa::leerDatos(const char *fichero) {
 
 		for(int j = 0; j < D.nEntradas; j++){
 			f >> aux;
-			D.vEntradas.push_back(aux);
+			vAux.push_back(aux);
 		}
+		D.mEntradas.push_back(vAux);
+		vAux.clear();
 
 		for(int j = 0; j < D.nSalidas; j++){
 			f >> aux;
-			D.vSalidas.push_back(aux);
+			vAux.push_back(aux);
 		}
+		D.mSalidas.push_back(vAux);
+		vAux.clear();
 
 	}
 
 	f.close();
-
-	return D;
 }
 
 // ------------------------------
 // Entrenar la red on-line para un determinado fichero de datos
 void PerceptronMulticapa::entrenarOnline(Datos& D) {
 	int i;
-	//for(i=0; i < D.nPatrones; i++)
-		simularRedOnline(D.vEntradas, D.vSalidas);
+	for(i=0; i < D.nPatrones; i++)
+		simularRedOnline(D.mEntradas[i], D.mSalidas[i]);
 }
 
 // ------------------------------
@@ -329,9 +331,9 @@ double PerceptronMulticapa::test(Datos& Dtest) {
 	double dAvgTestError = 0;
 	for(i = 0; i < Dtest.nPatrones; i++){
 		// Cargamos las entradas y propagamos el valor
-		alimentarEntradas(Dtest.vEntradas[i]);
+		alimentarEntradas(Dtest.mEntradas[i]);
 		propagarEntradas();
-		dAvgTestError += calcularErrorSalida(Dtest.vSalidas);
+		dAvgTestError += calcularErrorSalida(Dtest.mSalidas[i]);
 	}
 	dAvgTestError /= Dtest.nPatrones;
 	return dAvgTestError;
@@ -389,11 +391,11 @@ void PerceptronMulticapa::ejecutarAlgoritmoOnline(Datos& Dtrain, Datos& Dtest, i
 		vector <double> prediccion;
 
 		// Cargamos las entradas y propagamos el valor
-		alimentarEntradas(Dtest.vEntradas[i]);
+		alimentarEntradas(Dtest.mEntradas[i]);
 		propagarEntradas();
 		recogerSalidas(prediccion);
 		for(int j=0; j<Dtest.nSalidas; j++)
-			cout << Dtest.vSalidas[i][j] << " -- " << prediccion[j];
+			cout << Dtest.mSalidas[i][j] << " -- " << prediccion[j];
 		cout << endl;
 		prediccion.clear();
 
